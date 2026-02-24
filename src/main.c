@@ -1,29 +1,18 @@
 #include <stdio.h>
 #include <limits.h>
 #include <time.h>
-#include <sanitizer/lsan_interface.h>
 
-#include "../inc/SDL2/include/SDL.h"
 #include "../inc/lalg.h"
 #include "../inc/camera.h"
 #include "../inc/text.h"
 #include "../inc/color.h"
+#include "../inc/backend_sdl.h"
+
 #include "../assets/asset_cube.h"
 #include "../assets/asset_teapot.h"
 
 static         size_t lines_count_global    = 0;
 static         size_t triangle_count_global = 0;
-
-static const uint32_t SCREEN_WIDTH  = 1920;
-static const uint32_t SCREEN_HEIGHT = 1080;
-static const uint32_t PIXELS_NUMBER = SCREEN_WIDTH*SCREEN_HEIGHT;
-
-typedef struct {
-	SDL_Window*  window;
-	SDL_Surface* surface;
-	SDL_Event    event;
-	size_t       bytes_per_pixel;
-} SDLContext;
 
 typedef struct {
 	uint32_t flags;
@@ -37,39 +26,12 @@ State state = {
 	.wireframe = true
 };
 
-void pixel_set(uint32_t x, uint32_t y, uint32_t* buffer, uint32_t color)
-{
+void pixel_set(uint32_t x, uint32_t y, uint32_t* buffer, uint32_t color) {
 
-if (x >= SCREEN_WIDTH || y >= SCREEN_HEIGHT) return;
-
-
-	//printf("here! ps\n");
-    buffer[y * SCREEN_WIDTH + x] = color;
+	if (x >= SCREEN_WIDTH || y >= SCREEN_HEIGHT) return;
+	buffer[y * SCREEN_WIDTH + x] = color;
 }
 
-void memory_free(SDLContext* ctx) {
-
-	SDL_DestroyWindow(ctx->window);
-	free(ctx);
-}
-
-void context_sdl_init(SDLContext* ctx) {
-
-	// suppress SDL memory leak errors
-	__lsan_disable();
-
-	SDL_Init(SDL_INIT_VIDEO);
-	ctx->window = SDL_CreateWindow("SoftRend", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-						   SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-	if (!ctx->window) fprintf(stderr, "Failed to create window. Error: %s\n", SDL_GetError());
-
-	ctx->surface = SDL_GetWindowSurface(ctx->window);
-	ctx->bytes_per_pixel = ctx->surface->format->BytesPerPixel;
-
-
-	SDL_SetRelativeMouseMode(SDL_TRUE);
-	__lsan_enable();
-}
 
 static inline V3f world_to_view(V3f v_in, Camera c) {
 
@@ -426,7 +388,7 @@ int main(void) {
 
 	event_loop(ctx, buffer, camera);
 
-	memory_free(ctx);
+	context_sdl_destroy(ctx);
 	SDL_Quit();
 
 	return 0;
