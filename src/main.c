@@ -23,9 +23,9 @@
 
 static const float EPS = 1e-8;
 
-static         size_t lines_count_global    	   = 0;
-static         size_t triangle_count_global 	   = 0;
-static         size_t models_rejected_count_global = 0;
+static	size_t lines_count_global	    = 0;
+static	size_t triangle_count_global	    = 0;
+static	size_t models_rejected_count_global = 0;
 
 static float* buffer_depth = NULL;
 
@@ -84,9 +84,9 @@ static inline V3f world_to_view(V3f v_in, Camera c) {
 		.z = v_in.z - c.position.z
 	};
 
-        res.x = rel.x * right.x     + rel.y * right.y     + rel.z * right.z;
-        res.y = rel.x * c.up.x      + rel.y * c.up.y      + rel.z * c.up.z;
-        res.z = rel.x * c.forward.x + rel.y * c.forward.y + rel.z * c.forward.z;
+	res.x = rel.x * right.x     + rel.y * right.y     + rel.z * right.z;
+	res.y = rel.x * c.up.x      + rel.y * c.up.y      + rel.z * c.up.z;
+	res.z = rel.x * c.forward.x + rel.y * c.forward.y + rel.z * c.forward.z;
 
 	return res;
 }
@@ -134,27 +134,25 @@ bool clipline(int32_t *x1, int32_t *y1, int32_t *x2, int32_t *y2) {
 		float pi = p[i];
 		float qi = q[i];
 
-		/* Handle near-parallel (pi == 0) robustly */
+		// handle near-parallel (pi == 0)
 		if (fabs(pi) < EPS) {
 			if (qi < 0.0f) return false;
 		} else {
 			float r = qi / pi;
-	                if (pi < 0.0f) {
-                		if (r > u1) u1 = r;
+			if (pi < 0.0f) {
+				if (r > u1) u1 = r;
 			} else {
-		                if (r < u2) u2 = r;
-           		}
+				if (r < u2) u2 = r;
+			}
 			if (u1 > u2) return false;
-            	}
+		}
 	}
 
-	/* compute clipped coordinates using original x1,y1,d */
 	float nx1 = *x1 + u1 * dx;
 	float ny1 = *y1 + u1 * dy;
 	float nx2 = *x1 + u2 * dx;
 	float ny2 = *y1 + u2 * dy;
 
-	/* round to nearest integer (llround available in math.h) */
 	*x1 = (int32_t) llroundf(nx1);
 	*y1 = (int32_t) llroundf(ny1);
 	*x2 = (int32_t) llroundf(nx2);
@@ -330,7 +328,7 @@ void triangle_draw(Triangle t, uint32_t* buffer, Camera camera, Color color) {
 	if (intensity < 0.0f) intensity = 0.0f;
 	color = shade_color(color, intensity);
 
-	float invDenom = 1.0f / denom;
+	float denom_inv = 1.0f / denom;
 
 	for (int32_t y = y_min; y <= y_max; ++y) {
 	for (int32_t x = x_min; x <= x_max; ++x) {
@@ -340,8 +338,8 @@ void triangle_draw(Triangle t, uint32_t* buffer, Camera camera, Color color) {
 		float py = (float) y + 0.5f;
 
 		// barycentric coords
-		float a = ( (v2y - v3y) * (px - v3x) + (v3x - v2x) * (py - v3y) ) * invDenom;
-		float b = ( (v3y - v1y) * (px - v3x) + (v1x - v3x) * (py - v3y) ) * invDenom;
+		float a = ( (v2y - v3y) * (px - v3x) + (v3x - v2x) * (py - v3y) ) * denom_inv;
+		float b = ( (v3y - v1y) * (px - v3x) + (v1x - v3x) * (py - v3y) ) * denom_inv;
 		float c = 1.0f - a - b;
 
 		// TODO: this is a hack, we need a consistent top-left rule
@@ -377,13 +375,13 @@ double time_measure_end_ms(struct timespec* t1, const struct timespec* t0, size_
 		nsec += 1000000000L;
 	}
 	*samples_cur += 1;
-	if (*samples_cur == 256) {
-		*t_ms_avg = *t_ms_avg_rolling / 256.0;
+	if (*samples_cur == 128) {
+		*t_ms_avg = *t_ms_avg_rolling / 128.0;
 		*t_ms_avg_rolling = 0;
 		*samples_cur = 0;
 	}
 
-	text_render(string_format("frame time = %.2f ms, FPS = %.2f (256 samples), "
+	text_render(string_format("frame time = %.2f ms, FPS = %.2f (128 samples), "
 				  "lines drawn = %zu, triangles drawn = %zu\n",
 				*t_ms_avg, 1000.0 / *t_ms_avg, lines_count_global,
 				triangle_count_global), 0, 0, buffer, GREEN, 2);
@@ -558,6 +556,7 @@ void event_loop(SDLContext* ctx, uint32_t* buffer, Camera camera) {
 			t = triangle_offset(t, player.position);
 			triangle_draw(t, buffer, camera, EMERALD);
 		}
+*/
 
 		for (int i = asset_player.f_count - 1; i >= 0; i--) {
 			Triangle t = {
@@ -568,7 +567,7 @@ void event_loop(SDLContext* ctx, uint32_t* buffer, Camera camera) {
 			t = triangle_offset(t, player.position);
 			triangle_draw(t, buffer, camera, EMERALD);
 		}
-		*/
+
 		/*
 		for (int i = asset_kochmuetze.f_count - 1; i >= 0; i--) {
 			Triangle t = {
@@ -579,9 +578,9 @@ void event_loop(SDLContext* ctx, uint32_t* buffer, Camera camera) {
 			triangle_draw(t, buffer, camera, EMERALD);
 		}
 		*/
-
-		for (size_t x = 0; x < 10; x++) {
-		for (size_t z = 0; z < 10; z++) {
+		/*
+		for (size_t x = 0; x < 4; x++) {
+		for (size_t z = 0; z < 4; z++) {
 			V3f offset = { .x = (float) x * 8.0f, .y = 0.0f, .z = (float) z * 8.0f };
 			if (state.vfc) {
 				V3f max = add_3f(asset_teapot.max, offset);
@@ -603,7 +602,7 @@ void event_loop(SDLContext* ctx, uint32_t* buffer, Camera camera) {
 				triangle_draw(t, buffer, camera, EMERALD);
 			}
 		}}
-
+		*/
 		buffer_depth_max();
 		SDL_UpdateWindowSurface(ctx->window);
 		buffer_flush(buffer, ctx->bytes_per_pixel);
