@@ -1,7 +1,7 @@
 #!/bin/bash
 
 gcc -o xsrend \
-	src/main.c src/backend_sdl.c src/camera.c src/text.c\
+	-std=gnu23 src/main.c src/backend_sdl.c src/camera.c src/text.c\
 	lib/libSDL2.a \
 	-lm \
 	-Wall -Wextra -Wfloat-equal -Wshadow -Wpointer-arith \

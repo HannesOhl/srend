@@ -7,10 +7,10 @@ static void make_guard(char *dst, size_t dst_size, const char *base) {
 
 	snprintf(dst, dst_size, "ASSET_%s_H", base);
 	for (size_t i = 0; dst[i]; ++i) {
-		if (!isalnum((unsigned char)dst[i])) {
+		if (!isalnum( (unsigned char) dst[i])) {
 			dst[i] = '_';
 		} else {
-			dst[i] = toupper((unsigned char)dst[i]);
+			dst[i] = toupper( (unsigned char) dst[i]);
 		}
 	}
 }
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
 	size_t len = 0;
 	ssize_t read;
 
-	while ((read = getline(&line, &len, in_obj)) != -1) {
+	while ( (read = getline(&line, &len, in_obj) ) != -1) {
 		if (read == 0) continue;
 		if (line[0] == 'v' && line[1] == ' ') {
 		    vertex_count++;

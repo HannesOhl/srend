@@ -4,7 +4,7 @@
 #include "../inc/SDL2/include/SDL.h"
 
 static const uint32_t SCREEN_WIDTH  = 1200;
-static const uint32_t SCREEN_HEIGHT = 600;
+static const uint32_t SCREEN_HEIGHT = 1080;
 static const uint32_t PIXELS_NUMBER = SCREEN_WIDTH*SCREEN_HEIGHT;
 
 typedef struct {
