@@ -1,5 +1,8 @@
-- fix objToC to produce the TEST_asset_cube.h example.
 
-- add texture support ?
 - use model normals and dont recalc. them for every triangle ?0
 - handle delta-time, ie. constant framerate ?
+
+pngToBin:
+	- take a look at deflate and write it on my own
+	- fix the check.py to read last two bits and set width/height
+	-
