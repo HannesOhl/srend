@@ -755,7 +755,7 @@ int main(void) {
 	#ifdef UNIT_TEST
 		if (!LALG_tests_run()) {
 			fprintf(stderr, "lalg tests failed!\n");
-			exit(-1);
+			exit(-2);
 		}
 	#endif
 
