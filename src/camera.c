@@ -1,6 +1,6 @@
 #include "../inc/camera.h"
 
-#include "../inc/lalg.h"
+#include "../tools/lalg.h"
 
 #include <math.h>
 #include <stdio.h>

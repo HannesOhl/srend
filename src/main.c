@@ -6,7 +6,7 @@
 #include <arpa/inet.h>
 
 #define UNIT_TEST
-#include "../inc/lalg.h"
+#include "../tools/lalg.h"
 #include "../inc/camera.h"
 #include "../inc/text.h"
 #include "../inc/color.h"
