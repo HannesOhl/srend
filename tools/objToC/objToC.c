@@ -214,10 +214,26 @@ void usage() {
 	die("usage: %s input.obj [-o output-file]\n", pname);
 }
 
+typedef struct {
+	bool o_flg;
+	char o_arg[BUF_MAX];
+} Options;
+Options opt = {
+	.o_flg = false
+};
+
 int main(int argc, char** argv) {
 
 	pname = argv[0];
 	if (argc < 2) usage();
+
+	size_t arg = 2;
+	while (arg < argc) {
+		if (strncmp(argv[arg++], "-o", 2) == 0) {
+			opt.o_flg = true;
+			strcpy(opt.o_arg, argv[arg++]);
+		}
+	}
 
 	FILE* in_obj = fopen(argv[1], "r");
 	if (!in_obj) {
@@ -225,17 +241,26 @@ int main(int argc, char** argv) {
 		return EXIT_FAILURE;
 	}
 
-	printf("arg = %s\n", argv[1]);
 	char base_name[BUF_MAX];
 	make_base_name(argv[1], base_name);
-	printf("base_name = %s\n", base_name);
 
 	char base_path[BUF_MAX];
 	make_base_path(argv[1], base_path);
-	printf("base_path = %s\n", base_path);
 
 	char out_path[BUF_MAX];
-	snprintf(out_path, sizeof(out_path), "%smesh_%s.h", base_path, base_name);
+	if (opt.o_flg) {
+		if (opt.o_arg[strlen(opt.o_arg)-1] != '/') {
+			snprintf(out_path, sizeof(out_path), "%s",
+				 opt.o_arg);
+		} else {
+			snprintf(out_path, sizeof(out_path), "%smesh_%s.h",
+				 opt.o_arg, base_name);
+		}
+
+	} else {
+		snprintf(out_path, sizeof(out_path), "%smesh_%s.h",
+			 base_path, base_name);
+	}
 	FILE* out_h = fopen(out_path, "w");
 
 	// first pass: get counts
