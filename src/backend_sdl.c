@@ -1,11 +1,15 @@
 #include "../inc/backend_sdl.h"
 
+#ifdef DEBUG
 #include <sanitizer/lsan_interface.h>
+#endif
 
 void context_sdl_init(SDLContext* ctx) {
 
 	// disable lsan (to suppress SDL memory leak errors)
+	#ifdef DEBUG
 	__lsan_disable();
+	#endif
 
 	SDL_Init(SDL_INIT_VIDEO);
 	ctx->window = SDL_CreateWindow("SoftRend", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -18,7 +22,9 @@ void context_sdl_init(SDLContext* ctx) {
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	// re-enable lsan
+	#ifdef DEBUG
 	__lsan_enable();
+	#endif
 }
 
 void context_sdl_destroy(SDLContext* ctx) {
