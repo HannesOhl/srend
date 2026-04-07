@@ -11,7 +11,7 @@ typedef struct {
 	SDL_Window*  window;
 	SDL_Surface* surface;
 	SDL_Event    event;
-	size_t       bytes_per_pixel;
+	uint32_t     bytes_per_pixel;
 } SDLContext;
 
 void context_sdl_init(SDLContext* ctx);

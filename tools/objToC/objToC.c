@@ -117,12 +117,12 @@ void vertices_print(FILE* out_h, size_t v_count, float* v) {
 
 	size_t v_cur = 0;
 	for (size_t i = 0; i < v_count - 1; i++) {
-		fprintf(out_h, "\t\t{{ %+8.6f, %+8.6f, %+8.6f }},\n",
+		fprintf(out_h, "\t\t{{ %+8.6ff, %+8.6ff, %+8.6ff }},\n",
 				v[v_cur], v[v_cur+1], v[v_cur+2]);
 		v_cur += 3;
 	}
 
-	fprintf(out_h, "\t\t{{ %+8.6f, %+8.6f, %+8.6f }}\n",
+	fprintf(out_h, "\t\t{{ %+8.6ff, %+8.6ff, %+8.6ff }}\n",
 			v[v_cur], v[v_cur+1], v[v_cur+2]);
 	fprintf(out_h, "\t},\n");
 }
@@ -133,12 +133,12 @@ void texture_coordinates_print(FILE* out_h, size_t vt_count, float* vt) {
 
 	size_t vt_cur = 0;
 	for (size_t i = 0; i < vt_count - 1; i++) {
-		fprintf(out_h, "\t\t{{ %+8.6f, %+8.6f }},\n",
+		fprintf(out_h, "\t\t{{ %+8.6ff, %+8.6ff }},\n",
 				vt[vt_cur], vt[vt_cur+1]);
 		vt_cur += 2;
 	}
 
-	fprintf(out_h, "\t\t{{ %+8.6f, %+8.6f }}\n",
+	fprintf(out_h, "\t\t{{ %+8.6ff, %+8.6ff }}\n",
 			vt[vt_cur], vt[vt_cur+1]);
 	fprintf(out_h, "\t},\n");
 }
@@ -149,12 +149,12 @@ void vertex_normals_print(FILE* out_h, size_t vn_count, float* vn) {
 
 	size_t vn_cur = 0;
 	for (size_t i = 0; i < vn_count - 1; i++) {
-		fprintf(out_h, "\t\t{{ %+8.6f, %+8.6f, %+8.6f }},\n",
+		fprintf(out_h, "\t\t{{ %+8.6ff, %+8.6ff, %+8.6ff }},\n",
 				vn[vn_cur], vn[vn_cur+1], vn[vn_cur+2]);
 		vn_cur += 3;
 	}
 
-	fprintf(out_h, "\t\t{{ %+8.6f, %+8.6f, %+8.6f }}\n",
+	fprintf(out_h, "\t\t{{ %+8.6ff, %+8.6ff, %+8.6ff }}\n",
 			vn[vn_cur], vn[vn_cur+1], vn[vn_cur+2]);
 	fprintf(out_h, "\t},\n");
 }

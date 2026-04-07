@@ -14,12 +14,12 @@
 #include "../inc/textures.h"
 
 //#include "../assets/inc/asset_teapot.h"
-#include "../assets/inc/asset_player.h"
-#include "../assets/inc/asset_zylinder.h"
-#include "../assets/inc/asset_zaubererhut.h"
+//#include "../assets/inc/asset_player.h"
+//#include "../assets/inc/asset_zylinder.h"
+//#include "../assets/inc/asset_zaubererhut.h"
 #include "../assets/inc/mesh_lok.h"
 #include "../assets/inc/mesh_messa.h"
-#include "../assets/inc/asset_kochmuetze.h"
+//#include "../assets/inc/asset_kochmuetze.h"
 
 #define XMIN 40
 #define YMIN 40
@@ -152,10 +152,10 @@ State state = {
 	.abb = false
 };
 
-void pixel_set(uint32_t x, uint32_t y, uint32_t* buffer, uint32_t color) {
+void pixel_set(int32_t x, int32_t y, uint32_t* buffer, uint32_t color) {
 
-	if (x >= SCREEN_WIDTH || y >= SCREEN_HEIGHT) return;
-	buffer[x + y * SCREEN_WIDTH] = color;
+	if (x >= (int32_t) SCREEN_WIDTH || y >= (int32_t) SCREEN_HEIGHT) return;
+	buffer[x + y * (int32_t) SCREEN_WIDTH] = color;
 }
 
 void player_info() {
@@ -189,7 +189,7 @@ V2s get_image_crd(V3f v, Camera camera) {
 
 	const float znear = camera.znear;
 	const float a = (float) SCREEN_HEIGHT / (float) SCREEN_WIDTH;
-	const float f = 1.0f / tanf(0.5f * camera.fovy * M_PI / 180.0f);
+	const float f = 1.0f / tanf(0.5f * camera.fovy * (float) M_PI / 180.0f);
 
 	float px = a * f * v.x;
 	float py = f * v.y;
@@ -199,8 +199,8 @@ V2s get_image_crd(V3f v, Camera camera) {
 	px /= pz;
 	py /= pz;
 
-	int32_t x_screen = (int32_t) ( (px + 1.0f) * 0.5f * (int32_t) SCREEN_WIDTH  );
-	int32_t y_screen = (int32_t) ( (1.0f - py) * 0.5f * (int32_t) SCREEN_HEIGHT );
+	int32_t x_screen = (int32_t) ( (px + 1.0f) * 0.5f * (float) SCREEN_WIDTH  );
+	int32_t y_screen = (int32_t) ( (1.0f - py) * 0.5f * (float) SCREEN_HEIGHT );
 
 	// Clamp to avoid overflow of small V2s types
 	if (x_screen < INT32_MIN) x_screen = INT32_MIN;
@@ -218,8 +218,8 @@ bool clipline(int32_t *x1, int32_t *y1, int32_t *x2, int32_t *y2) {
 	const float dy = (float) (*y2 - *y1);
 
 	float p[4] = { -dx, dx, -dy, dy };
-	float q[4] = { *x1 - (float) XMIN, (float) XMAX - *x1,
-		       *y1 - (float) YMIN, (float) YMAX - *y1 };
+	float q[4] = { (float) *x1 - (float) XMIN, (float) XMAX - (float) *x1,
+		       (float) *y1 - (float) YMIN, (float) YMAX - (float) *y1 };
 
 	float u1 = 0.0f;
 	float u2 = 1.0f;
@@ -242,10 +242,10 @@ bool clipline(int32_t *x1, int32_t *y1, int32_t *x2, int32_t *y2) {
 		}
 	}
 
-	float nx1 = *x1 + u1 * dx;
-	float ny1 = *y1 + u1 * dy;
-	float nx2 = *x1 + u2 * dx;
-	float ny2 = *y1 + u2 * dy;
+	float nx1 = (float) *x1 + u1 * dx;
+	float ny1 = (float) *y1 + u1 * dy;
+	float nx2 = (float) *x1 + u2 * dx;
+	float ny2 = (float) *y1 + u2 * dy;
 
 	*x1 = (int32_t) llroundf(nx1);
 	*y1 = (int32_t) llroundf(ny1);
@@ -321,7 +321,7 @@ void grid_draw(uint32_t* buffer, Camera camera) {
 	}
 }
 
-void buffer_flush(uint32_t* buffer, uint8_t bytes_per_pixel) {
+void buffer_flush(uint32_t* buffer, uint32_t bytes_per_pixel) {
 
 	memset(buffer, 0, PIXELS_NUMBER * bytes_per_pixel);
 }
@@ -454,8 +454,8 @@ void triangle_draw(Triangle t, V2f uv1, V2f uv2, V2f uv3, uint32_t* buffer, Came
 			float u = u_over_z * z_inv;
 			float v = v_over_z * z_inv;
 
-			uint32_t tx = (uint32_t) (u * (tw - 1));
-			uint32_t ty = (uint32_t) ((1.0f - v ) * (th - 1));
+			uint32_t tx = (uint32_t) (u * (float) (tw - 1));
+			uint32_t ty = (uint32_t) ((1.0f - v ) * (float) (th - 1));
 
 			if (tx >= tw) tx = tw - 1;
 			if (ty >= th) ty = th - 1;
@@ -581,7 +581,7 @@ double time_measure_end_ms(struct timespec* t1, const struct timespec* t0, size_
 				*t_ms_avg, 1000.0 / *t_ms_avg, lines_count_global,
 				triangle_count_global), 0, 0, buffer, GREEN, 2);
 
-	return sec * 1000.0 + nsec / 1e6;
+	return (double) sec * 1000.0 + (double) nsec / 1e6;
 }
 
 Triangle triangle_offset(Triangle t, V3f offset) {
@@ -642,8 +642,8 @@ void event_loop(SDLContext* ctx, uint32_t* buffer, Camera camera, Model* model) 
 
 			case SDL_MOUSEMOTION:
 				V2f rel = {
-					.x = ctx->event.motion.xrel,
-					.y = ctx->event.motion.yrel,
+					.x = (float) ctx->event.motion.xrel,
+					.y = (float) ctx->event.motion.yrel,
 				};
 				camera_update_mouse(&camera, rel);
 
@@ -787,9 +787,9 @@ int main(void) {
 	// prepare models
 	size_t model_number = 5;
 	Model model[model_number] = {};
-	model[0] = model_assemble(&asset_player  , &texture_player);
-	model[1] = model_assemble(&asset_zylinder, &texture_zylinder);
-	model[2] = model_assemble(&asset_zaubererhut, &texture_zaubererhut);
+	//model[0] = model_assemble(&asset_player  , &texture_player);
+	//model[1] = model_assemble(&asset_zylinder, &texture_zylinder);
+	//model[2] = model_assemble(&asset_zaubererhut, &texture_zaubererhut);
 	model[3] = model_assemble(&mesh_messa, &texture_messa);
 	model[4] = model_assemble(&mesh_lok, &texture_lok);
 

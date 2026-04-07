@@ -18,7 +18,7 @@ void camera_default_set(Camera* c) {
 void camera_update_mouse(Camera* camera, V2f rel) {
 
 	// sets mouse speed
-	float scale = 1e-3;
+	float scale = 1e-3f;
 
 	V3f v_y = (V3f) {{ 0.0f, 1.0f, 0.0f}};
 	// x-direction
@@ -29,7 +29,7 @@ void camera_update_mouse(Camera* camera, V2f rel) {
 	float angle_y     = -scale * rel.y;
 	V3f right         = norm_3f( cross_3f(camera->forward, v_y) );
 	camera->forward   = norm_3f( rot_ax(camera->forward, right, angle_y) );
-	camera->forward.y = maxf(camera->forward.y, -0.9);
+	camera->forward.y = maxf(camera->forward.y, -0.9f);
 	camera->up        = norm_3f( cross_3f(right, camera->forward) );
 }
 

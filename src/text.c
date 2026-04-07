@@ -43,11 +43,11 @@ void char_render(char c, uint32_t x, uint32_t y, uint32_t* buffer, Color color, 
 
 	const uint8_t* chr = font[(unsigned char)c];
 
-	for (size_t i = 0; i < CHAR_HEIGHT_FONT; i++) {
-	for (size_t j = 0; j < CHAR_WIDTH_FONT ; j++) {
+	for (uint32_t i = 0; i < (uint32_t) CHAR_HEIGHT_FONT; i++) {
+	for (uint32_t j = 0; j < (uint32_t) CHAR_WIDTH_FONT ; j++) {
 		if (chr[j] & (1<<i)) {
-			for (size_t sy = 0; sy < scale; sy++) {
-			for (size_t sx = 0; sx < scale; sx++) {
+			for (uint32_t sy = 0; sy < scale; sy++) {
+			for (uint32_t sx = 0; sx < scale; sx++) {
 				pixel_set(x+j*scale+sx, y+i*scale+sy, buffer, color);
 			}}
 		}
@@ -58,7 +58,7 @@ void text_render(const char* str, uint32_t x, uint32_t y, uint32_t* buffer, Colo
 
 	while (*str) {
 		char_render(*str++, x, y, buffer, color, scale);
-		x += CHAR_WIDTH_FONT*scale;
+		x += (uint32_t) CHAR_WIDTH_FONT * scale;
 	}
 }
 
