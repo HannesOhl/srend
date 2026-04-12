@@ -721,6 +721,7 @@ void event_loop(SDLContext* ctx, uint32_t* buffer, Camera camera, Model* model) 
 					projectile.pos, projectile.up, rot, projectile.right, rot2);
 			projectile.pos = add(projectile.pos, scale(0.1f, projectile.vel));
 		}
+<<<<<<< Updated upstream
 
 		model_render_advanced(&model[4], buffer, camera,
 					player.position, projectile.up, 0, projectile.right, 0);
@@ -746,6 +747,69 @@ void event_loop(SDLContext* ctx, uint32_t* buffer, Camera camera, Model* model) 
 		text_render(string_format(" n: projectile active = %s\n", projectile.active ? "on" : "off"),
 			    0, 120, buffer, GREEN, 2);
 
+=======
+*/
+		static float angle = 0.0f;
+		angle += 0.01;
+		//M3f mat_rot1 = rot_xz_3f(+angle);
+		//M3f mat_rot2 = rot_xz_3f(-angle);
+
+		for (int i = asset_kochmuetze.f_count - 1; i >= 0; i--) {
+			Triangle t = {
+				.v1 = asset_kochmuetze.v[asset_kochmuetze.f[i].x-1],
+				.v2 = asset_kochmuetze.v[asset_kochmuetze.f[i].y-1],
+				.v3 = asset_kochmuetze.v[asset_kochmuetze.f[i].z-1]
+			};
+			t = triangle_offset(t, player.position);
+			triangle_draw(t, buffer, camera, EMERALD);
+		}
+
+		for (int i = asset_player.f_count - 1; i >= 0; i--) {
+			Triangle t = {
+				.v1 = asset_player.v[asset_player.f[i].x-1],
+				.v2 = asset_player.v[asset_player.f[i].y-1],
+				.v3 = asset_player.v[asset_player.f[i].z-1]
+			};
+			t = triangle_offset(t, player.position);
+			triangle_draw(t, buffer, camera, EMERALD);
+		}
+
+		/*
+		for (int i = asset_kochmuetze.f_count - 1; i >= 0; i--) {
+			Triangle t = {
+				.v1 = mul_m3f_v3f(mat_rot1, asset_kochmuetze.v[asset_kochmuetze.f[i].x-1]),
+				.v2 = mul_m3f_v3f(mat_rot1, asset_kochmuetze.v[asset_kochmuetze.f[i].y-1]),
+				.v3 = mul_m3f_v3f(mat_rot1, asset_kochmuetze.v[asset_kochmuetze.f[i].z-1])
+			};
+			triangle_draw(t, buffer, camera, EMERALD);
+		}
+		*/
+		/*
+		for (size_t x = 0; x < 10; x++) {
+		for (size_t z = 0; z < 10; z++) {
+			V3f offset = { .x = (float) x * 8.0f, .y = 0.0f, .z = (float) z * 8.0f };
+			if (state.vfc) {
+				V3f max = add_3f(asset_teapot.max, offset);
+				V3f min = add_3f(asset_teapot.min, offset);
+				V3f dir = sub_3f(max, camera.position);
+				if (dot_3f(dir, camera.forward) <= 0) {
+					models_rejected_count_global += 1;
+					continue;
+				}
+			}
+			for (int i = asset_teapot.f_count - 1; i >= 0; i--) {
+				Triangle t = {
+					.v1 = mul_m3f_v3f(mat_rot1, asset_teapot.v[asset_teapot.f[i].x-1]),
+					.v2 = mul_m3f_v3f(mat_rot1, asset_teapot.v[asset_teapot.f[i].y-1]),
+					.v3 = mul_m3f_v3f(mat_rot1, asset_teapot.v[asset_teapot.f[i].z-1])
+				};
+				t = triangle_offset(t, offset);
+
+				triangle_draw(t, buffer, camera, EMERALD);
+			}
+		}}
+		*/
+>>>>>>> Stashed changes
 		buffer_depth_max();
 
 		SDL_UpdateWindowSurface(ctx->window);
