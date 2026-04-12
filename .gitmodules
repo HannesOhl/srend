@@ -1,3 +1,9 @@
 [submodule "tools/lalg"]
 	path = tools/lalg
 	url = git@github.com:HannesOhl/lalg.git
+[submodule "tools/objToC"]
+	path = tools/objToC
+	url = git@github.com:HannesOhl/objToC.git
+[submodule "tools/pngToBin"]
+	path = tools/pngToBin
+	url = git@github.com:HannesOhl/pngToBin.git
