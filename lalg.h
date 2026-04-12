@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include <math.h>
 #include <stddef.h>
-
 // vectors: types
 typedef struct {
 	uint32_t x;
