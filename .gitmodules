@@ -1,0 +1,3 @@
+[submodule "tools/lalg"]
+	path = tools/lalg
+	url = git@github.com:HannesOhl/lalg.git
