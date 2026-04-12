@@ -4,6 +4,12 @@
 
 set -e
 
+# abort if dirty
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "Working tree is dirty. Commit or stash first."
+  exit 1
+fi
+
 eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
 
