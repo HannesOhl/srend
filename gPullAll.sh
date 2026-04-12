@@ -7,6 +7,6 @@ set -e
 eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
 
-git subtree pull --prefix=tools/lalg lalg-remote main
-git subtree pull --prefix=tools/objToC objToC-remote main
-git subtree pull --prefix=tools/pngToBin pngToBin-remote main
+git subtree pull --prefix=tools/lalg lalg-remote main --squash
+git subtree pull --prefix=tools/objToC objToC-remote main --squash
+git subtree pull --prefix=tools/pngToBin pngToBin-remote main --squash
