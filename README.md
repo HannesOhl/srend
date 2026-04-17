@@ -12,6 +12,8 @@ We also make use of C23's feature #embed, therefore GCC version 15 is used.
 ### How to run
 This project is a personal project, thus no guarantees are made. Currently no release branch is provided. It might compile, it might not. Simply run 
 ```bash
+$ git clone --recursive https://github.com/HannesOhl/srend.git
+$ cd srend/
 $ make
 $ ./xsrend 
 ```
