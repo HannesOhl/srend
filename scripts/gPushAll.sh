@@ -30,7 +30,7 @@ ssh-add ~/.ssh/id_ed25519
 # push submodules first
 echo -e "${CYAN}Pushing submodules...${NC}"
 
-for dir in tools/lalg tools/objToC tools/pngToBin; do
+for dir in ../tools/lalg ../tools/objToC ../tools/pngToBin; do
     if [ -d "$dir" ]; then
         echo -e "-- $dir"
 
