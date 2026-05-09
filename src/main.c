@@ -13,13 +13,8 @@
 #include "../inc/backend_sdl.h"
 #include "../inc/textures.h"
 
-//#include "../assets/inc/asset_teapot.h"
-//#include "../assets/inc/asset_player.h"
-//#include "../assets/inc/asset_zylinder.h"
-//#include "../assets/inc/asset_zaubererhut.h"
-#include "../inc/meshes/mesh_lok.h"
+#include "../inc/meshes/mesh_player.h"
 #include "../inc/meshes/mesh_messa.h"
-//#include "../assets/inc/asset_kochmuetze.h"
 
 #define XMIN 40
 #define YMIN 40
@@ -717,21 +712,20 @@ void event_loop(SDLContext* ctx, uint32_t* buffer, Camera camera, Model* model) 
 			//rot = 0;
 			//rot2 = 0;
 
-			model_render_advanced(&model[3], buffer, camera,
+			model_render_advanced(&model[1], buffer, camera,
 					projectile.pos, projectile.up, rot, projectile.right, rot2);
 			projectile.pos = add(projectile.pos, scale(0.1f, projectile.vel));
 		}
 
-		model_render_advanced(&model[4], buffer, camera,
+
+		model_render_advanced(&model[0], buffer, camera,
 					player.position, projectile.up, 0, projectile.right, 0);
 
-		/*
-		if (state.hat) {
-			model_render(model[1], buffer, camera);
-		} else {
-			model_render(model[2], buffer, camera);
-		}
-		*/
+		for (size_t i = 0; i < 10; i++) {
+		for (size_t j = 0; j < 10; j++) {
+			V3f offset = (V3f) {{ (float) i * 10.0f, 0.0f, (float) j * 10.0f }};
+			model_render(model[0], buffer, camera, offset);
+		}}
 
 		text_render(string_format(" w: wireframe         = %s\n", state.wfr ? "on" : "off"),
 		            0,  20, buffer, GREEN, 2);
@@ -789,21 +783,17 @@ int main(void) {
 	// prepare models
 	size_t model_number = 5;
 	Model model[model_number] = {};
-	//model[0] = model_assemble(&asset_player  , &texture_player);
+	model[0] = model_assemble(&mesh_player  , &texture_player);
+	model[1] = model_assemble(&mesh_messa, &texture_messa);
 	//model[1] = model_assemble(&asset_zylinder, &texture_zylinder);
 	//model[2] = model_assemble(&asset_zaubererhut, &texture_zaubererhut);
-	model[3] = model_assemble(&mesh_messa, &texture_messa);
-	model[4] = model_assemble(&mesh_lok, &texture_lok);
+	//model[4] = model_assemble(&mesh_lok, &texture_lok);
 
 	// event loop
 	event_loop(ctx, buffer, camera, model);
 
 	// clean-up
 	free(model[0].mesh);
-	free(model[1].mesh);
-	free(model[2].mesh);
-	free(model[3].mesh);
-	free(model[4].mesh);
 	free(buffer_depth);
 	context_sdl_destroy(ctx);
 	SDL_Quit();
