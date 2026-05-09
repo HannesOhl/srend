@@ -2,7 +2,8 @@
 This is a small software-renderer/game-engine i wrote to better understand rendering pipelines and the basics of computer graphics.
 
 ### Demo
-Below a small demo: 
+Here a small demo:
+
 ![](./demo.gif)
 
 We use a minimal set of dependencies. SDL is only used to handle user input and to open a window. We then have access to the pixel buffer:
