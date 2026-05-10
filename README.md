@@ -1,5 +1,5 @@
 ### Overview
-This is a small software-renderer/game-engine i wrote to better understand rendering pipelines and the basics of computer graphics.
+This is a small software-renderer/game-engine I wrote to better understand rendering pipelines and the basics of computer graphics.
 
 ### Demo
 Here a small demo:
