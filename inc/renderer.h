@@ -10,5 +10,7 @@ typedef struct {
 	Camera camera;
 } Renderer;
 
+void renderer_init(Renderer* renderer);
+
 #endif
 
