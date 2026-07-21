@@ -197,7 +197,7 @@ V2s get_image_crd(V3f v, Camera camera) {
 	int32_t x_screen = (int32_t) ( (px + 1.0f) * 0.5f * (float) SCREEN_WIDTH  );
 	int32_t y_screen = (int32_t) ( (1.0f - py) * 0.5f * (float) SCREEN_HEIGHT );
 
-	// Clamp to avoid overflow of small V2s types
+	// clamp to avoid overflow of small V2s types
 	if (x_screen < INT32_MIN) x_screen = INT32_MIN;
 	if (x_screen > INT32_MAX) x_screen = INT32_MAX;
 	if (y_screen < INT32_MIN) y_screen = INT32_MIN;
@@ -328,21 +328,6 @@ void background_render(uint32_t* buffer) {
 	}}
 }
 
-static inline Color shade_color(Color c, float intensity) {
-
-	if (intensity < 0.1f) intensity = 0.1f;
-	if (intensity > 1.0f) intensity = 1.0f;
-
-	uint32_t i = (uint32_t) (intensity * 255.0f);
-
-	uint32_t r = ( (c >> 24) & 0xFF) * i >> 8;
-	uint32_t g = ( (c >> 16) & 0xFF) * i >> 8;
-	uint32_t b = ( (c >>  8) & 0xFF) * i >> 8;
-	uint32_t a =   (c        & 0xFF)         ;
-
-	return (r << 24) | (g << 16) | (b << 8) | a;
-}
-
 void triangle_draw(Triangle t, V2f uv1, V2f uv2, V2f uv3, Renderer* renderer, Color color, const Texture* tex) {
 
 	Camera camera = renderer->camera;
@@ -411,14 +396,6 @@ void triangle_draw(Triangle t, V2f uv1, V2f uv2, V2f uv3, Renderer* renderer, Co
 	float denom = (v2y - v3y)*(v1x - v3x) + (v3x - v2x)*(v1y - v3y);
 	if (fabsf(denom) < EPS) return;
 
-	// get shaded color for triangle based on global light pos
-	/*
-	V3f light_global_pos_w = { .x = 5.0f, .y = 5.0f, .z = 5.0f };
-	V3f light_global_pos_v = world_to_view(light_global_pos_w, camera);
-	V3f dir = norm(sub(t.v1, light_global_pos_v));
-	float intensity = dot(dir, n);
-	color = shade_color(color, intensity);
-	*/
 	float denom_inv = 1.0f / denom;
 	const float BC_EPS = 1e-6f;
 
@@ -557,35 +534,6 @@ void model_render(Model model, Renderer* renderer, V3f offset) {
 	}
 }
 
-void time_measure_start(struct timespec* t0) {
-	clock_gettime(CLOCK_MONOTONIC, t0);
-}
-
-double time_measure_end_ms(struct timespec* t1, const struct timespec* t0, size_t* samples_cur, double* t_ms_avg, double* t_ms_avg_rolling, uint32_t* buffer) {
-	clock_gettime(CLOCK_MONOTONIC, t1);
-
-	time_t sec  = t1->tv_sec  - t0->tv_sec;
-	long   nsec = t1->tv_nsec - t0->tv_nsec;
-
-	if (nsec < 0) {
-		sec-=1;
-		nsec += 1000000000L;
-	}
-	*samples_cur += 1;
-	if (*samples_cur == 128) {
-		*t_ms_avg = *t_ms_avg_rolling / 128.0;
-		*t_ms_avg_rolling = 0;
-		*samples_cur = 0;
-	}
-
-	text_render(string_format(" frame time = %.2f ms, FPS = %.2f (128 samples), "
-				  "lines drawn = %zu, triangles drawn = %zu\n",
-				*t_ms_avg, 1000.0 / *t_ms_avg, lines_count_global,
-				triangle_count_global), 0, 0, buffer, GREEN, 2);
-
-	return (double) sec * 1000.0 + (double) nsec / 1e6;
-}
-
 Triangle triangle_offset(Triangle t, V3f offset) {
 	Triangle res = {0};
 
@@ -596,24 +544,64 @@ Triangle triangle_offset(Triangle t, V3f offset) {
 	return res;
 }
 
+typedef struct {
+	size_t samples_number;
+
+	struct timespec t0;
+	struct timespec t1;
+
+	size_t samples_cur;
+	double t_ms_avg;
+	double t_ms_avg_rolling;
+} Timer;
+
+void time_measure_start(Timer* tmr) {
+	clock_gettime(CLOCK_MONOTONIC, &tmr->t0);
+}
+
+void time_measure_end(Timer* tmr) {
+
+	clock_gettime(CLOCK_MONOTONIC, &tmr->t1);
+
+	time_t sec  = tmr->t1.tv_sec  - tmr->t0.tv_sec;
+	long   nsec = tmr->t1.tv_nsec - tmr->t0.tv_nsec;
+
+	if (nsec < 0) {
+		 sec -= 1;
+		nsec += 1000000000L;
+	}
+
+	tmr->samples_cur += 1;
+	if (tmr->samples_cur == 128) {
+		tmr->t_ms_avg = tmr->t_ms_avg_rolling / 128.0;
+		tmr->t_ms_avg_rolling = 0;
+		tmr->samples_cur = 0;
+	}
+
+	tmr->t_ms_avg_rolling += (double) sec * 1000.0 + (double) nsec / 1e6;
+}
+
+void frame_info_print(Timer* tmr, uint32_t* buffer) {
+
+	text_render(string_format(" frame time = %.2f ms, FPS = %.2f (128 samples), "
+				  "lines drawn = %zu, triangles drawn = %zu\n",
+				tmr->t_ms_avg, 1000.0 / tmr->t_ms_avg, lines_count_global,
+				triangle_count_global), 0, 0, buffer, GREEN, 2);
+}
+
 void event_loop(SDLContext* ctx, Renderer* renderer, Model* model) {
 
 
 	Camera camera = renderer->camera;
 	uint32_t* buffer = renderer->buffer_frame;
 
-	// for fps calculation
-	struct timespec t0 = {0};
-	struct timespec t1 = {0};
+	// to calculate fps and frame time
+	Timer tmr = {0};
 
 	bool running = true;
-
-	size_t samples_cur      = 0;
-	double t_ms_avg         = 0;
-	double t_ms_avg_rolling = 0;
 	while (running) {
 
-		time_measure_start(&t0);
+		time_measure_start(&tmr);
 		while (SDL_PollEvent(&ctx->event) != 0) {
 
 			switch (ctx->event.type) {
@@ -709,8 +697,6 @@ void event_loop(SDLContext* ctx, Renderer* renderer, Model* model) {
 			V2f n = { .x = projectile.right.x, .y = projectile.right.z };
 			n = norm(n);
 			float rot = atan2f(n.x, n.y);
-			//rot = 0;
-			//rot2 = 0;
 
 			model_render_advanced(&model[1], renderer,
 					projectile.pos, projectile.up, rot, projectile.right, rot2);
@@ -740,14 +726,16 @@ void event_loop(SDLContext* ctx, Renderer* renderer, Model* model) {
 		text_render(string_format(" n: projectile active = %s\n", projectile.active ? "on" : "off"),
 			    0, 120, buffer, GREEN, 2);
 
-		buffer_depth_maximize(renderer);
-
 		SDL_UpdateWindowSurface(ctx->window);
 		buffer_flush(buffer, ctx->bytes_per_pixel);
 		//background_render(buffer);
 
+		// reset depth buffer
+		buffer_depth_maximize(renderer);
+
 		// end time measuring
-		t_ms_avg_rolling += time_measure_end_ms(&t1, &t0, &samples_cur, &t_ms_avg, &t_ms_avg_rolling, buffer);
+		time_measure_end(&tmr);
+		frame_info_print(&tmr, buffer);
 
 		lines_count_global     	     = 0;
 		triangle_count_global 	     = 0;
