@@ -598,8 +598,6 @@ void buffer_depth_max() {
 	}
 }
 
-
-
 void event_loop(SDLContext* ctx, uint32_t* buffer, Camera camera, Model* model) {
 
 	// for fps calculation
