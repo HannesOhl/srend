@@ -17,7 +17,7 @@ SFLAGS := -fsanitize=address -fno-omit-frame-pointer
 LFLAGS := lib/libSDL2.a
 LFLAGS += -lm
 
-SOURCE := src/main.c src/backend_sdl.c src/camera.c src/text.c
+SOURCE := src/main.c src/backend_sdl.c src/camera.c src/text.c src/renderer.c
 OBJECT := $(SOURCE:.c=.o)
 
 all: $(TARGET)

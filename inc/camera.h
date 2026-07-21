@@ -14,6 +14,7 @@ typedef struct {
 } Camera;
 
 
+void camera_init(Camera* c);
 void camera_default_set(Camera* c);
 void camera_update_mouse(Camera* camera, V2f rel);
 void camera_info_print(Camera camera);

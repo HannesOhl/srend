@@ -7,6 +7,7 @@
 #define UNIT_TEST
 #include "../tools/lalg/lalg.h"
 
+#include "../inc/renderer.h"
 #include "../inc/camera.h"
 #include "../inc/text.h"
 #include "../inc/color.h"
@@ -117,8 +118,6 @@ static const float EPS = 1e-8f;
 static size_t lines_count_global	   = 0;
 static size_t triangle_count_global	   = 0;
 static size_t models_rejected_count_global = 0;
-
-static float* buffer_depth = NULL;
 
 typedef struct {
 	V3f position;
@@ -344,7 +343,10 @@ static inline Color shade_color(Color c, float intensity) {
 	return (r << 24) | (g << 16) | (b << 8) | a;
 }
 
-void triangle_draw(Triangle t, V2f uv1, V2f uv2, V2f uv3, uint32_t* buffer, Camera camera, Color color, const Texture* tex) {
+void triangle_draw(Triangle t, V2f uv1, V2f uv2, V2f uv3, Renderer* renderer, Color color, const Texture* tex) {
+
+	Camera camera = renderer->camera;
+	uint32_t* buffer = renderer->buffer_frame;
 
 	if (state.wfr) {
 		line_draw(t.v1, t.v2, buffer, color, camera);
@@ -466,8 +468,8 @@ void triangle_draw(Triangle t, V2f uv1, V2f uv2, V2f uv3, uint32_t* buffer, Came
 			Color texel = current_pixel;
 
 			idx = (size_t) x + (size_t) y * (size_t) SCREEN_WIDTH;
-			if (z < buffer_depth[idx]) {
-				buffer_depth[idx] = z;
+			if (z < renderer->buffer_depth[idx]) {
+				renderer->buffer_depth[idx] = z;
 				pixel_set(x, y, buffer, texel);
 			}
 		}
@@ -510,8 +512,11 @@ void aabb_render(BoundingBox bb, uint32_t* buffer, Camera camera) {
 	line_draw(max_ground_max, max_sky_max, buffer, GREEN, camera);
 }
 
-void model_render_advanced(Model* model, uint32_t* buffer, Camera camera,
-			   V3f offset, V3f ax1, float r, V3f ax2, float r2) {
+void model_render_advanced(Model* model, Renderer* renderer,
+		V3f offset, V3f ax1, float r, V3f ax2, float r2) {
+
+	Camera camera = renderer->camera;
+	uint32_t* buffer = renderer->buffer_frame;
 
 	for (size_t i = 0; i < model->mesh->f_count; i++) {
 		Triangle t = {
@@ -524,7 +529,7 @@ void model_render_advanced(Model* model, uint32_t* buffer, Camera camera,
 		V2f vt2 = model->mesh->vt[model->mesh->f[i].c2.vt-1];
 		V2f vt3 = model->mesh->vt[model->mesh->f[i].c3.vt-1];
 
-		triangle_draw(t, vt1, vt2, vt3, buffer, camera, GREEN, model->tex);
+		triangle_draw(t, vt1, vt2, vt3, renderer, GREEN, model->tex);
 	}
 
 	BoundingBox new = {
@@ -535,7 +540,7 @@ void model_render_advanced(Model* model, uint32_t* buffer, Camera camera,
 }
 
 
-void model_render(Model model, uint32_t* buffer, Camera camera, V3f offset) {
+void model_render(Model model, Renderer* renderer, V3f offset) {
 
 	for (size_t i = 0; i < model.mesh->f_count; i++) {
 		Triangle t = {
@@ -548,7 +553,7 @@ void model_render(Model model, uint32_t* buffer, Camera camera, V3f offset) {
 		V2f vt2 = model.mesh->vt[model.mesh->f[i].c2.vt-1];
 		V2f vt3 = model.mesh->vt[model.mesh->f[i].c3.vt-1];
 
-		triangle_draw(t, vt1, vt2, vt3, buffer, camera, GREEN, model.tex);
+		triangle_draw(t, vt1, vt2, vt3, renderer, GREEN, model.tex);
 	}
 }
 
@@ -591,14 +596,11 @@ Triangle triangle_offset(Triangle t, V3f offset) {
 	return res;
 }
 
-void buffer_depth_max() {
+void event_loop(SDLContext* ctx, Renderer* renderer, Model* model) {
 
-	for (size_t i = 0; i < SCREEN_WIDTH*SCREEN_HEIGHT; i++) {
-		buffer_depth[i] = FLT_MAX;
-	}
-}
 
-void event_loop(SDLContext* ctx, uint32_t* buffer, Camera camera, Model* model) {
+	Camera camera = renderer->camera;
+	uint32_t* buffer = renderer->buffer_frame;
 
 	// for fps calculation
 	struct timespec t0 = {0};
@@ -710,19 +712,19 @@ void event_loop(SDLContext* ctx, uint32_t* buffer, Camera camera, Model* model) 
 			//rot = 0;
 			//rot2 = 0;
 
-			model_render_advanced(&model[1], buffer, camera,
+			model_render_advanced(&model[1], renderer,
 					projectile.pos, projectile.up, rot, projectile.right, rot2);
 			projectile.pos = add(projectile.pos, scale(0.1f, projectile.vel));
 		}
 
 
-		model_render_advanced(&model[0], buffer, camera,
+		model_render_advanced(&model[0], renderer,
 					player.position, projectile.up, 0, projectile.right, 0);
 
 		for (size_t i = 0; i < 10; i++) {
 		for (size_t j = 0; j < 10; j++) {
 			V3f offset = (V3f) {{ (float) i * 10.0f, 0.0f, (float) j * 10.0f }};
-			model_render(model[0], buffer, camera, offset);
+			model_render(model[0], renderer, offset);
 		}}
 
 		text_render(string_format(" w: wireframe         = %s\n", state.wfr ? "on" : "off"),
@@ -738,7 +740,7 @@ void event_loop(SDLContext* ctx, uint32_t* buffer, Camera camera, Model* model) 
 		text_render(string_format(" n: projectile active = %s\n", projectile.active ? "on" : "off"),
 			    0, 120, buffer, GREEN, 2);
 
-		buffer_depth_max();
+		buffer_depth_maximize(renderer);
 
 		SDL_UpdateWindowSurface(ctx->window);
 		buffer_flush(buffer, ctx->bytes_per_pixel);
@@ -752,6 +754,7 @@ void event_loop(SDLContext* ctx, uint32_t* buffer, Camera camera, Model* model) 
 		models_rejected_count_global = 0;
 		//player_info();
 		//camera_info_print(camera);
+		renderer->camera = camera;
 	}
 }
 
@@ -764,19 +767,13 @@ int main(void) {
 		}
 	#endif
 
-	buffer_depth = calloc((size_t) SCREEN_WIDTH*SCREEN_HEIGHT,
-			      (size_t) sizeof *buffer_depth);
-	for (size_t i = 0; i < SCREEN_WIDTH*SCREEN_HEIGHT; i++) {
-		buffer_depth[i] = FLT_MAX;
-	}
+	Renderer* renderer = calloc((size_t) 1, (size_t) sizeof *renderer);
+	renderer_init(renderer, SCREEN_WIDTH * SCREEN_HEIGHT);
 
 	SDLContext* ctx = calloc((size_t) 1, (size_t) sizeof *ctx);
 	context_sdl_init(ctx);
 
-	uint32_t* buffer = ctx->surface->pixels;
-
-	Camera camera;
-	camera_default_set(&camera);
+	renderer->buffer_frame = ctx->surface->pixels;
 
 	// prepare models
 	size_t model_number = 5;
@@ -788,11 +785,10 @@ int main(void) {
 	//model[4] = model_assemble(&mesh_lok, &texture_lok);
 
 	// event loop
-	event_loop(ctx, buffer, camera, model);
+	event_loop(ctx, renderer, model);
 
 	// clean-up
 	free(model[0].mesh);
-	free(buffer_depth);
 	context_sdl_destroy(ctx);
 	SDL_Quit();
 

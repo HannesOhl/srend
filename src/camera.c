@@ -5,6 +5,15 @@
 #include <math.h>
 #include <stdio.h>
 
+void camera_init(Camera* c) {
+	c->position = (V3f) {{ 4.0f, 1.0f, -12.0f }};
+	c->forward  = (V3f) {{ 0.0f, 0.0f,   1.0f }};
+	c->up 	    = (V3f) {{ 0.0f, 1.0f,   0.0f }};
+	c->fovy     = 80.0f;
+	c->znear    = 0.5f;
+	c->zfar     = 100.0f;
+}
+
 void camera_default_set(Camera* c) {
 
 	c->position = (V3f) {{ 4.0f, 1.0f, -12.0f }};
