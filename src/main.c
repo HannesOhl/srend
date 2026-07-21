@@ -767,13 +767,13 @@ int main(void) {
 		}
 	#endif
 
-	Renderer* renderer = calloc((size_t) 1, (size_t) sizeof *renderer);
-	renderer_init(renderer, SCREEN_WIDTH * SCREEN_HEIGHT);
+	Renderer renderer = {0};
+	renderer_init(&renderer, SCREEN_WIDTH * SCREEN_HEIGHT);
 
-	SDLContext* ctx = calloc((size_t) 1, (size_t) sizeof *ctx);
-	context_sdl_init(ctx);
+	SDLContext ctx = {0};
+	context_sdl_init(&ctx);
 
-	renderer->buffer_frame = ctx->surface->pixels;
+	renderer.buffer_frame = ctx.surface->pixels;
 
 	// prepare models
 	size_t model_number = 5;
@@ -785,11 +785,11 @@ int main(void) {
 	//model[4] = model_assemble(&mesh_lok, &texture_lok);
 
 	// event loop
-	event_loop(ctx, renderer, model);
+	event_loop(&ctx, &renderer, model);
 
 	// clean-up
 	free(model[0].mesh);
-	context_sdl_destroy(ctx);
+	context_sdl_destroy(&ctx);
 	SDL_Quit();
 
 	return 0;
