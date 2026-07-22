@@ -26,5 +26,8 @@ void renderer_init(Renderer* renderer, size_t pixels_number) {
 
 	// init camera
 	camera_init(&renderer->camera);
+
+	// init settings
+	renderer->settings.grd = true;
 }
 

@@ -22,8 +22,6 @@
 #define XMAX (SCREEN_WIDTH  - 40)
 #define YMAX (SCREEN_HEIGHT - 40)
 
-static float rot2;
-
 typedef struct {
 	V3f center;
 	V3f extend;
@@ -126,21 +124,6 @@ typedef struct {
 Player player = {
 	.position = { .x = 0.0f, .y = 0.0f, .z = 0.0f },
 	.forward  = { .x = 0.0f, .y = 0.0f, .z = 1.0f }
-};
-
-typedef struct {
-	bool grd;
-	bool wfr;
-	bool bfc;
-	bool vfc;
-	bool abb;
-} State;
-State state = {
-	.grd = true,
-	.wfr = false,
-	.bfc = false,
-	.vfc = false,
-	.abb = false
 };
 
 void pixel_set(int32_t x, int32_t y, uint32_t* buffer, uint32_t color) {
@@ -328,6 +311,7 @@ void triangle_draw(Triangle t, V2f uv1, V2f uv2, V2f uv3, Renderer* renderer, Co
 
 	Camera camera = renderer->camera;
 	uint32_t* buffer = renderer->buffer_frame;
+	Settings state = renderer->settings;
 
 	if (state.wfr) {
 		line_draw(t.v1, t.v2, buffer, color, camera);
@@ -490,6 +474,7 @@ void model_render_advanced(Model* model, Renderer* renderer,
 
 	Camera camera = renderer->camera;
 	uint32_t* buffer = renderer->buffer_frame;
+	Settings state = renderer->settings;
 
 	for (size_t i = 0; i < model->mesh->f_count; i++) {
 		Triangle t = {
@@ -598,50 +583,9 @@ void event_loop(SDLContext* ctx, Renderer* renderer, Model* model) {
 	while (running) {
 
 		time_measure_start(&tmr);
-		while (SDL_PollEvent(&ctx->event) != 0) {
+		input_handle(renderer, &camera, &running);
 
-			switch (ctx->event.type) {
-
-			case SDL_KEYDOWN:
-				if (ctx->event.key.keysym.sym == SDLK_n) {
-					rot2 = 0.0f;
-					projectile.active = !projectile.active;
-					projectile.pos = add(camera.position, scale(4.0f, camera.forward));
-					projectile.vel = scale(0.5f, camera.forward);
-					projectile.right = norm( cross(camera.forward, camera.up));
-					projectile.up = (V3f) {{ 0.0f, 1.0f, 0.0f }};
-
-				}
-				break;
-
-			case SDL_MOUSEMOTION:
-				V2f rel = {
-					.x = (float) ctx->event.motion.xrel,
-					.y = (float) ctx->event.motion.yrel,
-				};
-				camera_update_mouse(&camera, rel);
-
-			default:
-				break;
-			}
-		}
-
-		input_handle(&camera, &running);
-
-		if (state.grd) grid_draw(buffer, camera);
-
-		if (projectile.active) {
-
-			rot2 += 0.01f;
-			V2f n = { .x = projectile.right.x, .y = projectile.right.z };
-			n = norm(n);
-			float rot = atan2f(n.x, n.y);
-
-			model_render_advanced(&model[1], renderer,
-					projectile.pos, projectile.up, rot, projectile.right, rot2);
-			projectile.pos = add(projectile.pos, scale(0.1f, projectile.vel));
-		}
-
+		if (renderer->settings.grd) grid_draw(buffer, camera);
 
 		model_render_advanced(&model[0], renderer,
 					player.position, projectile.up, 0, projectile.right, 0);
@@ -652,18 +596,16 @@ void event_loop(SDLContext* ctx, Renderer* renderer, Model* model) {
 			model_render(model[0], renderer, offset);
 		}}
 
-		text_render(string_format(" w: wireframe         = %s\n", state.wfr ? "on" : "off"),
+		text_render(string_format(" w: wireframe         = %s\n", renderer->settings.wfr ? "on" : "off"),
 		            0,  20, buffer, GREEN, 2);
-		text_render(string_format(" b: backface culling  = %s\n", state.bfc ? "on" : "off"),
+		text_render(string_format(" b: backface culling  = %s\n", renderer->settings.bfc ? "on" : "off"),
 			    0,  40, buffer, GREEN, 2);
-		text_render(string_format(" f: frustum culling   = %s\n", state.vfc ? "on" : "off"),
+		text_render(string_format(" f: frustum culling   = %s\n", renderer->settings.vfc ? "on" : "off"),
 			    0,  60, buffer, GREEN, 2);
-		text_render(string_format(" c: show AABB         = %s\n", state.abb ? "on" : "off"),
+		text_render(string_format(" c: show AABB         = %s\n", renderer->settings.abb ? "on" : "off"),
 			    0,  80, buffer, GREEN, 2);
-		text_render(string_format(" g: show grid         = %s\n", state.grd ? "on" : "off"),
+		text_render(string_format(" g: show grid         = %s\n", renderer->settings.grd ? "on" : "off"),
 			    0, 100, buffer, GREEN, 2);
-		text_render(string_format(" n: projectile active = %s\n", projectile.active ? "on" : "off"),
-			    0, 120, buffer, GREEN, 2);
 
 		SDL_UpdateWindowSurface(ctx->window);
 		buffer_flush(buffer, ctx->bytes_per_pixel);

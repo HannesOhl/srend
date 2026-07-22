@@ -4,6 +4,14 @@
 #include "camera.h"
 
 typedef struct {
+	bool grd;
+	bool wfr;
+	bool bfc;
+	bool vfc;
+	bool abb;
+} Settings;
+
+typedef struct {
 
 	size_t pixels_number;
 
@@ -11,6 +19,7 @@ typedef struct {
 	   float* buffer_depth;
 
 	Camera camera;
+	Settings settings;
 } Renderer;
 
 void renderer_init(Renderer* renderer, size_t pixels_number);
