@@ -30,6 +30,33 @@ void context_sdl_init(SDLContext* ctx) {
 void context_sdl_destroy(SDLContext* ctx) {
 
 	SDL_DestroyWindow(ctx->window);
-	free(ctx);
+}
+
+void input_handle(Camera* c, bool* running) {
+
+	const Uint8* keys = SDL_GetKeyboardState(NULL);
+
+	float mv_fac = 0.05f;
+
+	// camera movement
+	V3f forward = c->forward;
+	V3f right   = norm( cross(c->forward, c->up) );
+	V3f up 	    = { .x = 0.0f, .y = 1.0f, .z = 0.0f };
+
+	if (keys[SDL_SCANCODE_E])      c->position = add(c->position, scale(mv_fac, forward));
+	if (keys[SDL_SCANCODE_D])      c->position = sub(c->position, scale(mv_fac, forward));
+	if (keys[SDL_SCANCODE_S])      c->position = sub(c->position, scale(mv_fac,   right));
+	if (keys[SDL_SCANCODE_F])      c->position = add(c->position, scale(mv_fac,   right));
+	if (keys[SDL_SCANCODE_SPACE])  c->position = add(c->position, scale(mv_fac,      up));
+	if (keys[SDL_SCANCODE_LSHIFT]) c->position = sub(c->position, scale(mv_fac,      up));
+
+	// settings update
+	if (keys[SDL_SCANCODE_ESCAPE]) *running = false;
+	if (keys[SDL_SCANCODE_G])       state.grd = !state.grd;
+	if (keys[SDL_SCANCODE_W])       state.wfr = !state.wfr;
+	if (keys[SDL_SCANCODE_B])       state.bfc = !state.bfc;
+	if (keys[SDL_SCANCODE_F])       state.vfc = !state.vfc;
+	if (keys[SDL_SCANCODE_H])       state.hat = !state.hat;
+	if (keys[SDL_SCANCODE_C])       state.abb = !state.abb;
 }
 

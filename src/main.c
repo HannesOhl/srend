@@ -129,21 +129,17 @@ Player player = {
 };
 
 typedef struct {
-	uint32_t flags;
 	bool grd;
 	bool wfr;
 	bool bfc;
 	bool vfc;
-	bool hat;
 	bool abb;
 } State;
 State state = {
-	.flags = 0,
 	.grd = true,
 	.wfr = false,
 	.bfc = false,
 	.vfc = false,
-	.hat = false,
 	.abb = false
 };
 
@@ -386,9 +382,9 @@ void triangle_draw(Triangle t, V2f uv1, V2f uv2, V2f uv3, Renderer* renderer, Co
 	if (y_max > (int32_t) YMAX) y_max = (int32_t) YMAX;
 
 	// precompute floats for screen coords
-	float v1x = (float)v1.x, v1y = (float)v1.y;
-	float v2x = (float)v2.x, v2y = (float)v2.y;
-	float v3x = (float)v3.x, v3y = (float)v3.y;
+	float v1x = (float) v1.x, v1y = (float) v1.y;
+	float v2x = (float) v2.x, v2y = (float) v2.y;
+	float v3x = (float) v3.x, v3y = (float) v3.y;
 	float iz1 = 1.0f / t.v1.z;
 	float iz2 = 1.0f / t.v2.z;
 	float iz3 = 1.0f / t.v3.z;
@@ -607,13 +603,6 @@ void event_loop(SDLContext* ctx, Renderer* renderer, Model* model) {
 			switch (ctx->event.type) {
 
 			case SDL_KEYDOWN:
-				if (ctx->event.key.keysym.sym == SDLK_ESCAPE) running = false;
-				if (ctx->event.key.keysym.sym == SDLK_g) state.grd = !state.grd;
-				if (ctx->event.key.keysym.sym == SDLK_w) state.wfr = !state.wfr;
-				if (ctx->event.key.keysym.sym == SDLK_b) state.bfc = !state.bfc;
-				if (ctx->event.key.keysym.sym == SDLK_f) state.vfc = !state.vfc;
-				if (ctx->event.key.keysym.sym == SDLK_h) state.hat = !state.hat;
-				if (ctx->event.key.keysym.sym == SDLK_c) state.abb = !state.abb;
 				if (ctx->event.key.keysym.sym == SDLK_n) {
 					rot2 = 0.0f;
 					projectile.active = !projectile.active;
@@ -637,57 +626,7 @@ void event_loop(SDLContext* ctx, Renderer* renderer, Model* model) {
 			}
 		}
 
-		const Uint8* keys = SDL_GetKeyboardState(NULL);
-		float mv_fac = 0.05f;
-		float mv_fac_player = 0.05f;
-
-		if (keys[SDL_SCANCODE_E]) {
-			camera.position = add(camera.position, scale(mv_fac, camera.forward));
-		}
-		if (keys[SDL_SCANCODE_UP]) {
-			player.position = add(player.position, scale(mv_fac_player, player.forward));
-		}
-
-		if (keys[SDL_SCANCODE_D]) {
-			V3f dir = { .x = camera.forward.x, .y = 0.0f, .z = camera.forward.z };
-			dir = norm(dir);
-			camera.position = sub(camera.position, scale(mv_fac, dir));
-		}
-		if (keys[SDL_SCANCODE_DOWN]) {
-			V3f dir = { .x = player.forward.x, .y = 0.0f, .z = player.forward.z };
-			dir = norm(dir);
-			player.position = sub(player.position, scale(mv_fac_player, dir));
-		}
-
-		if (keys[SDL_SCANCODE_S]) {
-			V3f dir = norm(cross(camera.up, camera.forward));
-			camera.position = add(camera.position, scale(mv_fac, dir));
-		}
-		if (keys[SDL_SCANCODE_LEFT]) {
-			V3f up  = { .x = 0.0f, .y = 1.0f, .z = 0.0f };
-			V3f dir = norm(cross(up, player.forward));
-			player.position = add(player.position, scale(mv_fac_player, dir));
-		}
-
-		if (keys[SDL_SCANCODE_F]) {
-			V3f dir = norm(cross(camera.forward, camera.up));
-			camera.position = add(camera.position, scale(mv_fac, dir));
-		}
-		if (keys[SDL_SCANCODE_RIGHT]) {
-			V3f up  = { .x = 0.0f, .y = 1.0f, .z = 0.0f };
-			V3f dir = norm(cross(player.forward, up));
-			player.position = add(player.position, scale(mv_fac_player, dir));
-		}
-
-		if (keys[SDL_SCANCODE_SPACE]) {
-			V3f v = { .x = 0.0f, .y = 1.0f, .z = 0.0f };
-			camera.position = add( camera.position, scale(mv_fac, v) );
-		}
-
-		if (keys[SDL_SCANCODE_LSHIFT]) {
-			V3f v = { .x = 0.0f, .y = -1.0f, .z = 0.0f };
-			camera.position = add( camera.position, scale(mv_fac, v) );
-		}
+		input_handle(&camera, &running);
 
 		if (state.grd) grid_draw(buffer, camera);
 

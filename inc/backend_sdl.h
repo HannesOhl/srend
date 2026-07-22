@@ -2,6 +2,7 @@
 #define BACKEND_SDL_H
 
 #include "../inc/SDL2/include/SDL.h"
+#include "../inc/camera.h"
 
 static const uint32_t SCREEN_WIDTH  = 1200;
 static const uint32_t SCREEN_HEIGHT = 700;
@@ -16,6 +17,7 @@ typedef struct {
 
 void context_sdl_init(SDLContext* ctx);
 void context_sdl_destroy(SDLContext* ctx);
+void input_handle(Camera* c, bool* running);
 
 #endif
 
