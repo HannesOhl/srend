@@ -58,11 +58,12 @@ void input_handle(Renderer* renderer, Camera* c, bool* running) {
 		// settings update
 		case SDL_KEYDOWN:
 			if (event.key.keysym.sym == SDLK_ESCAPE) *running = false;
-			if (event.key.keysym.sym == SDLK_g)       renderer->settings.grd = !renderer->settings.grd;
-			if (event.key.keysym.sym == SDLK_w)       renderer->settings.wfr = !renderer->settings.wfr;
-			if (event.key.keysym.sym == SDLK_b)       renderer->settings.bfc = !renderer->settings.bfc;
-			if (event.key.keysym.sym == SDLK_f)       renderer->settings.vfc = !renderer->settings.vfc;
-			if (event.key.keysym.sym == SDLK_c)       renderer->settings.abb = !renderer->settings.abb;
+			if (event.key.keysym.sym == SDLK_TAB)     renderer->settings.active = !renderer->settings.active;
+			if (event.key.keysym.sym == SDLK_g)       renderer->settings.grd    = !renderer->settings.grd;
+			if (event.key.keysym.sym == SDLK_w)       renderer->settings.wfr    = !renderer->settings.wfr;
+			if (event.key.keysym.sym == SDLK_b)       renderer->settings.bfc    = !renderer->settings.bfc;
+			if (event.key.keysym.sym == SDLK_f)       renderer->settings.vfc    = !renderer->settings.vfc;
+			if (event.key.keysym.sym == SDLK_c)       renderer->settings.abb    = !renderer->settings.abb;
 			break;
 		// camera movement mouse
 		case SDL_MOUSEMOTION:

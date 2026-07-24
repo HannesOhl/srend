@@ -596,16 +596,7 @@ void event_loop(SDLContext* ctx, Renderer* renderer, Model* model) {
 			model_render(model[0], renderer, offset);
 		}}
 
-		text_render(string_format(" w: wireframe         = %s\n", renderer->settings.wfr ? "on" : "off"),
-		            0,  20, buffer, GREEN, 2);
-		text_render(string_format(" b: backface culling  = %s\n", renderer->settings.bfc ? "on" : "off"),
-			    0,  40, buffer, GREEN, 2);
-		text_render(string_format(" f: frustum culling   = %s\n", renderer->settings.vfc ? "on" : "off"),
-			    0,  60, buffer, GREEN, 2);
-		text_render(string_format(" c: show AABB         = %s\n", renderer->settings.abb ? "on" : "off"),
-			    0,  80, buffer, GREEN, 2);
-		text_render(string_format(" g: show grid         = %s\n", renderer->settings.grd ? "on" : "off"),
-			    0, 100, buffer, GREEN, 2);
+		settings_render(renderer);
 
 		SDL_UpdateWindowSurface(ctx->window);
 		buffer_flush(buffer, ctx->bytes_per_pixel);
@@ -616,6 +607,8 @@ void event_loop(SDLContext* ctx, Renderer* renderer, Model* model) {
 
 		// end time measuring
 		time_measure_end(&tmr);
+
+		//
 		frame_info_print(&tmr, buffer);
 
 		lines_count_global     	     = 0;

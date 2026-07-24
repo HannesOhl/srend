@@ -4,6 +4,7 @@
 #include "camera.h"
 
 typedef struct {
+	bool active;
 	bool grd;
 	bool wfr;
 	bool bfc;
@@ -24,6 +25,7 @@ typedef struct {
 
 void renderer_init(Renderer* renderer, size_t pixels_number);
 void buffer_depth_maximize(Renderer* renderer);
+void settings_render(Renderer* renderer);
 
 #endif
 

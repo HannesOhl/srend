@@ -1,5 +1,7 @@
 #include "../inc/renderer.h"
 
+#include "../inc/text.h"
+
 #include <stdlib.h>
 #include <float.h>
 
@@ -29,5 +31,21 @@ void renderer_init(Renderer* renderer, size_t pixels_number) {
 
 	// init settings
 	renderer->settings.grd = true;
+}
+
+void settings_render(Renderer* renderer) {
+
+	if (!renderer->settings.active) return;
+
+	text_render(string_format(" w: wireframe         = %s\n", renderer->settings.wfr ? "on" : "off"),
+		    0,  20, renderer->buffer_frame, GREEN, 2);
+	text_render(string_format(" b: backface culling  = %s\n", renderer->settings.bfc ? "on" : "off"),
+		    0,  40, renderer->buffer_frame, GREEN, 2);
+	text_render(string_format(" f: frustum culling   = %s\n", renderer->settings.vfc ? "on" : "off"),
+		    0,  60, renderer->buffer_frame, GREEN, 2);
+	text_render(string_format(" c: show AABB         = %s\n", renderer->settings.abb ? "on" : "off"),
+		    0,  80, renderer->buffer_frame, GREEN, 2);
+	text_render(string_format(" g: show grid         = %s\n", renderer->settings.grd ? "on" : "off"),
+		    0, 100, renderer->buffer_frame, GREEN, 2);
 }
 
