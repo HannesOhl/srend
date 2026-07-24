@@ -58,6 +58,31 @@ typedef struct {
 	V3f right;
 } Model;
 
+typedef struct {
+	Model* model;
+	V3f pos;
+} Entity;
+
+typedef struct {
+	size_t entity_number;
+	Entity entity[50];
+} Map;
+
+#define MAX_MODEL_NUM 5
+Model model[MAX_MODEL_NUM];
+
+Map map00 = {
+	.entity_number = 2,
+	.entity[0] = {
+		&model[0],
+		{{0.0f, 0.0f, 0.0f}}
+	},
+	.entity[1] = {
+		&model[0],
+		{{5.0f, 0.0f, 5.0f}}
+	}
+};
+
 Model model_assemble(const void* asset, const Texture* asset_texture) {
 
 	const uint8_t* a = (const uint8_t*) asset;
@@ -418,10 +443,10 @@ void triangle_draw(Triangle t, V2f uv1, V2f uv2, V2f uv3, Renderer* renderer, Co
 
 			size_t idx = (tx + ty*tw) * 4;
 			uint32_t current_pixel =
-				    ((uint32_t)tex->pixels[idx + 0] << 16) |
-				    ((uint32_t)tex->pixels[idx + 1] << 8)  |
-				    ((uint32_t)tex->pixels[idx + 2] << 0)  |
-				    ((uint32_t)tex->pixels[idx + 3] << 24);
+				    ((uint32_t) tex->pixels[idx + 0] << 16) |
+				    ((uint32_t) tex->pixels[idx + 1] << 8)  |
+				    ((uint32_t) tex->pixels[idx + 2] << 0)  |
+				    ((uint32_t) tex->pixels[idx + 3] << 24);
 			Color texel = current_pixel;
 
 			idx = (size_t) x + (size_t) y * (size_t) SCREEN_WIDTH;
@@ -497,7 +522,6 @@ void model_render_advanced(Model* model, Renderer* renderer,
 	if (state.abb) aabb_render(new, buffer, camera);
 }
 
-
 void model_render(Model model, Renderer* renderer, V3f offset) {
 
 	for (size_t i = 0; i < model.mesh->f_count; i++) {
@@ -512,6 +536,13 @@ void model_render(Model model, Renderer* renderer, V3f offset) {
 		V2f vt3 = model.mesh->vt[model.mesh->f[i].c3.vt-1];
 
 		triangle_draw(t, vt1, vt2, vt3, renderer, GREEN, model.tex);
+	}
+}
+
+void map_render(Renderer* renderer, Map* map) {
+
+	for (size_t i = 0; i < map->entity_number; i++) {
+		model_render(*map->entity[i].model, renderer, map->entity[i].pos);
 	}
 }
 
@@ -587,6 +618,7 @@ void event_loop(SDLContext* ctx, Renderer* renderer, Model* model) {
 
 		if (renderer->settings.grd) grid_draw(buffer, camera);
 
+		/*
 		model_render_advanced(&model[0], renderer,
 					player.position, projectile.up, 0, projectile.right, 0);
 
@@ -595,6 +627,9 @@ void event_loop(SDLContext* ctx, Renderer* renderer, Model* model) {
 			V3f offset = (V3f) {{ (float) i * 10.0f, 0.0f, (float) j * 10.0f }};
 			model_render(model[0], renderer, offset);
 		}}
+		*/
+
+		map_render(renderer, &map00);
 
 		settings_render(renderer);
 
@@ -638,8 +673,6 @@ int main(void) {
 	renderer.buffer_frame = ctx.surface->pixels;
 
 	// prepare models
-	size_t model_number = 5;
-	Model model[model_number] = {};
 	model[0] = model_assemble(&mesh_player  , &texture_player);
 	model[1] = model_assemble(&mesh_messa, &texture_messa);
 	//model[1] = model_assemble(&asset_zylinder, &texture_zylinder);
