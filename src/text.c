@@ -4,8 +4,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+static const uint32_t SCREEN_WIDTH  = 1200;
+static const uint32_t SCREEN_HEIGHT = 700;
+static const uint32_t PIXELS_NUMBER = SCREEN_WIDTH*SCREEN_HEIGHT;
+static void pixel_set(int32_t x, int32_t y, uint32_t* buffer, uint32_t color) {
 
-void pixel_set(uint32_t x, uint32_t y, uint32_t* buffer, uint32_t color);
+	if (x >= (int32_t) SCREEN_WIDTH || y >= (int32_t) SCREEN_HEIGHT) return;
+	buffer[x + y * (int32_t) SCREEN_WIDTH] = color;
+}
 
 // stolen from raylib (https://www.raylib.com)
 // but only a single global buffer (should never be twice on the stack)!

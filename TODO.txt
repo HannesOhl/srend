@@ -1,8 +1,10 @@
 srend:
+	- dont define SCREEN_WIDTH etc thrice rend/backend/text
 	- translate vertices, not triangles 		(!!!)
 	- cleaner mesh type, instead of AssetModel	(!!)
 	- make use of multi-threading	    		(!)
 	- handle delta-time, ie. constant framerate ?	(!)
+
 
 pngToBin:
 	- take a look at deflate and write it on my own	(!)
